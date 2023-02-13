@@ -4,7 +4,7 @@ import com.solartweaks.engine.tweaks.withModule
 import com.solartweaks.engine.util.*
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Type
-import java.util.UUID
+import java.util.*
 
 fun initBridge() = Unit
 
@@ -137,7 +137,9 @@ val renderPlayer = finders.findClass {
             method.isConstructor()
             arguments[1] = Type.BOOLEAN_TYPE
             transform {
-                val addMethod = method.calls.first { it.name != "<init>" }
+                if (!isOptifineLoaded) return@transform
+
+                val addMethod = method.calls.first { it.matches { method returns Type.BOOLEAN_TYPE } }
                 methodExit {
                     loadThis()
                     construct(

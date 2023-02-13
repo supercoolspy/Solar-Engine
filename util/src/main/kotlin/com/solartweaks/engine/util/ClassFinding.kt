@@ -1084,3 +1084,5 @@ inline fun ClassNode.allMethodsByFinder(block: MethodContext.() -> Unit): List<M
     val context = MethodContext().apply(block)
     return methodData.filter { context.matches(it) }
 }
+
+fun MethodInsnNode.matches(block: CallContext.() -> Unit) = CallContext().also(block).matches(this)
