@@ -1,7 +1,6 @@
 package com.solartweaks.engine.tweaks
 
 import com.solartweaks.engine.*
-import com.solartweaks.engine.Module
 import com.solartweaks.engine.util.*
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
@@ -275,6 +274,29 @@ fun initTweaks() {
             }
         }
     }
+
+    withModule<NoHitDelay> {
+        findMinecraftClass {
+            methods {
+                "clickMouseLegacyCombat" {
+                    method references { field named "LEGACY_COMBAT" }
+                    transform {
+                        overwrite {
+                            load<Any>(1)
+                            invokeMethod(
+                                invocationType = InvocationType.VIRTUAL,
+                                owner = "org/spongepowered/asm/mixin/injection/callback/CallbackInfo",
+                                name = "cancel",
+                                descriptor = "()V"
+                            )
+
+                            returnMethod()
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 inline fun <reified T : Module> withModule(
@@ -287,6 +309,11 @@ inline fun <reified T : Module> withModule(
 
 inline fun findLunarClass(crossinline block: ClassContext.() -> Unit) = finders.findClass {
     isLunarClass()
+    block()
+}
+
+inline fun findMinecraftClass(crossinline block: ClassContext.() -> Unit) = finders.findClass {
+    isMinecraftClass()
     block()
 }
 

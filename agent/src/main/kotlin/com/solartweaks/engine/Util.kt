@@ -1,6 +1,10 @@
 package com.solartweaks.engine
 
 import com.solartweaks.engine.util.*
+import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.util.TraceClassVisitor
+import java.io.ByteArrayOutputStream
+import java.io.PrintWriter
 import java.lang.invoke.MethodType
 import java.lang.reflect.Method
 
@@ -35,3 +39,9 @@ fun MethodData.asMethod(loader: ClassLoader = mainLoader) = loader.loadInternal(
 
 fun MethodData.tryInvoke(receiver: Any? = null, vararg params: Any?, method: Method = asMethod()) =
     method(receiver, *params)
+
+fun ClassNode.debug(): String {
+    val bout = ByteArrayOutputStream()
+    accept(TraceClassVisitor(null, PrintWriter(bout)))
+    return bout.toByteArray().decodeToString()
+}

@@ -174,6 +174,12 @@
             "displayName": "Metadata",
             "description": "Allows you to remove certain unwanted features from Lunar Client"
         },
+        "noHitDelay": {
+            "options": {
+            },
+            "displayName": "No Hit Delay",
+            "description": "Allows you to revert combat back to 1.7 and have no hit delay. This is sometimes considered a cheat, use at your own risk!"
+        },
         "privacy": {
             "options": {
             },

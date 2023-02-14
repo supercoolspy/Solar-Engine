@@ -82,6 +82,9 @@
         "fpsSpoof": {
             "multiplier": 1.0,
             "isEnabled": false
+        },
+        "noHitDelay": {
+            "isEnabled": true
         }
     },
     "customCommands": {

@@ -43,6 +43,8 @@ For every module, every option/property is listed as well.
   - Remove Forced Mod Settings: Prevents Lunar Client from forcing mod settings
   - Remove Pinned Servers: Removes the advertised servers on the Multiplayer screen
   - Remove Mod Bans (Freelook): Prevents Lunar from setting mod settings based on the server you are on (for example, this removes the Freelook ban)
+- No Hit Delay: Allows you to revert combat back to 1.7 and have no hit delay. This is sometimes considered a cheat, use at your own risk!
+
 - No Mouse Polling Popup: Removes the annoying popup about your mouse polling rate
 
 - Overlays: Allows you to use so-called "Lunar Client overlays"

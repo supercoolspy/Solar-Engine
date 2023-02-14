@@ -64,7 +64,8 @@ data class Modules(
     val removeProfilesCap: RemoveProfilesCap = RemoveProfilesCap(),
     val toggleSprintText: ToggleSprintText = ToggleSprintText(),
     val allowCrackedAccounts: AllowCrackedAccounts = AllowCrackedAccounts(),
-    val fpsSpoof: FPSSpoof = FPSSpoof()
+    val fpsSpoof: FPSSpoof = FPSSpoof(),
+    val noHitDelay: NoHitDelay = NoHitDelay(true) // tODO FIX
 ) {
     val modules
         get() = serializedPropertiesOf<Modules>()
@@ -349,6 +350,14 @@ data class FPSSpoof(
     val multiplier: Float = 1.0f,
     override val isEnabled: Boolean = false
 ) : Module
+
+@Serializable
+@ModuleInfo(
+    "No Hit Delay",
+    "Allows you to revert combat back to 1.7 and have no hit delay. " +
+            "This is sometimes considered a cheat, use at your own risk!"
+)
+data class NoHitDelay(override val isEnabled: Boolean = false) : Module
 
 @Serializable
 data class Schema(val modules: Map<String, ModuleDefinition>)

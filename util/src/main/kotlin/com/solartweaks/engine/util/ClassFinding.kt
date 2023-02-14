@@ -3,6 +3,7 @@ package com.solartweaks.engine.util
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.ClassNode
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
@@ -431,6 +432,11 @@ typealias FieldMatcher = (FieldData) -> Boolean
 typealias CallMatcher = (MethodInsnNode) -> Boolean
 
 /**
+ * Field Reference Matcher predicate
+ */
+typealias ReferenceMatcher = (FieldInsnNode) -> Boolean
+
+/**
  * Marker annotation for defining the finding DSL
  */
 @DslMarker
@@ -723,6 +729,14 @@ class MethodContext {
     }
 
     /**
+     * Matches if this method references a field defined by the [ReferenceContext]
+     */
+    infix fun MethodNodeMarker.references(matcher: ReferenceContext.() -> Unit) {
+        val context = ReferenceContext().also(matcher)
+        matchers += { (_, method) -> method.references { context.matches(it) } }
+    }
+
+    /**
      * Matches if this method calls a method defined by a [MethodDescription]
      */
     infix fun MethodNodeMarker.calls(desc: MethodDescription) {
@@ -971,6 +985,59 @@ class CallContext {
      * Checks if this [CallContext] matches a given [call]
      */
     fun matches(call: MethodInsnNode) = matchers.all { it(call) }
+}
+
+/**
+ * DSL for defining matchers for a [FieldInsnNode]
+ */
+@FindingDSL
+class ReferenceContext {
+    /**
+     * Allows you to access infix functions of [FieldNodeMarker]
+     */
+    val field = FieldNodeMarker
+
+    private val matchers = mutableListOf<ReferenceMatcher>()
+
+    /**
+     * Matches when the referenced field has a given [name]
+     */
+    infix fun FieldNodeMarker.named(name: String) {
+        matchers += { it.name == name }
+    }
+
+    /**
+     * Matches if this field reference returns [type]
+     */
+    infix fun FieldNodeMarker.isType(type: Type) {
+        matchers += { Type.getType(it.desc) == type }
+    }
+
+    /**
+     * Matches if this field reference is owned by [type]
+     */
+    infix fun FieldNodeMarker.ownedBy(type: Type) {
+        matchers += { it.owner == type.internalName }
+    }
+
+    /**
+     * Matches if the given [matcher] matches the field reference
+     */
+    infix fun FieldNodeMarker.match(matcher: ReferenceMatcher) {
+        matchers += matcher
+    }
+
+    /**
+     * Matches if the field is referenced with a given [opcode]
+     */
+    infix fun FieldNodeMarker.calledWith(opcode: Int) {
+        matchers += { it.opcode == opcode }
+    }
+
+    /**
+     * Checks if this [ReferenceContext] matches a given [insn]
+     */
+    fun matches(insn: FieldInsnNode) = matchers.all { it(insn) }
 }
 
 /**
