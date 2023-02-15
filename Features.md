@@ -37,6 +37,8 @@ For every module, every option/property is listed as well.
   - Multiplier: Specifies the number to multiply the fps value with
 - Hurt Camera Multiplier: Changes how much the camera shakes when taking damage
   - Multiplier: The amount of camera shake that you want. Set to 0 if you want to remove camera shake
+- Infinite Emotes: Allows you to always use emotes, even when walking
+
 - Metadata: Allows you to remove certain unwanted features from Lunar Client
   - Remove Blog Posts: Removes advertisements of Lunar on the home screen of the client
   - Remove Forced Client Settings: Similar as Remove Mod Settings, except more general. Usually has no effect (but it might in the future)

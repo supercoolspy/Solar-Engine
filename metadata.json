@@ -137,6 +137,12 @@
             "displayName": "Hurt Camera Multiplier",
             "description": "Changes how much the camera shakes when taking damage"
         },
+        "infiniteEmotes": {
+            "options": {
+            },
+            "displayName": "Infinite Emotes",
+            "description": "Allows you to always use emotes, even when walking"
+        },
         "lunarOverlays": {
             "options": {
             },

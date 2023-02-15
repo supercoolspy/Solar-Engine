@@ -84,6 +84,9 @@
             "isEnabled": false
         },
         "noHitDelay": {
+            "isEnabled": false
+        },
+        "infiniteEmotes": {
             "isEnabled": true
         }
     },

@@ -65,7 +65,8 @@ data class Modules(
     val toggleSprintText: ToggleSprintText = ToggleSprintText(),
     val allowCrackedAccounts: AllowCrackedAccounts = AllowCrackedAccounts(),
     val fpsSpoof: FPSSpoof = FPSSpoof(),
-    val noHitDelay: NoHitDelay = NoHitDelay(true) // tODO FIX
+    val noHitDelay: NoHitDelay = NoHitDelay(),
+    val infiniteEmotes: InfiniteEmotes = InfiniteEmotes()
 ) {
     val modules
         get() = serializedPropertiesOf<Modules>()
@@ -358,6 +359,13 @@ data class FPSSpoof(
             "This is sometimes considered a cheat, use at your own risk!"
 )
 data class NoHitDelay(override val isEnabled: Boolean = false) : Module
+
+@Serializable
+@ModuleInfo(
+    "Infinite Emotes",
+    "Allows you to always use emotes, even when walking"
+)
+data class InfiniteEmotes(override val isEnabled: Boolean = false) : Module
 
 @Serializable
 data class Schema(val modules: Map<String, ModuleDefinition>)

@@ -297,6 +297,12 @@ fun initTweaks() {
             }
         }
     }
+
+    withModule<InfiniteEmotes> {
+        findNamedClass("mchorse/emoticons/common/emotes/Emote") {
+            methods { namedTransform("shouldStopOnMove") { stubValue() } }
+        }
+    }
 }
 
 inline fun <reified T : Module> withModule(
@@ -314,6 +320,11 @@ inline fun findLunarClass(crossinline block: ClassContext.() -> Unit) = finders.
 
 inline fun findMinecraftClass(crossinline block: ClassContext.() -> Unit) = finders.findClass {
     isMinecraftClass()
+    block()
+}
+
+inline fun findNamedClass(name: String, crossinline block: ClassContext.() -> Unit) = finders.findClass {
+    node named name.replace('.', '/')
     block()
 }
 
