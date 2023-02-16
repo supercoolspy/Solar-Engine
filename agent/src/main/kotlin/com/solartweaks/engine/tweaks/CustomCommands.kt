@@ -9,8 +9,7 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.IFEQ
 
 fun initCustomCommands() {
-    finders.findClass {
-        isMinecraftClass()
+    findMinecraftClass {
         methods {
             named("bridge\$getClientBrand")
             "commandEvent" {
@@ -39,7 +38,7 @@ fun initCustomCommands() {
     }
 }
 
-val builtinCommands = mapOf(
+val builtinCommands: Map<String, (List<String>) -> Unit> = mapOf(
     "reloadcapesystem" to {
         if (isModuleEnabled<CapeSystem>()) {
             sendChatMessage("Reloading all cosmetics...")
@@ -125,16 +124,23 @@ val builtinCommands = mapOf(
             """
             )
         )
+    },
+    "reloadscripts" to {
+        globalConfiguration.customCommands.reloadScripts()
+        sendChatMessage("Done!", color = "green")
     }
 )
 
 fun handleCommand(command: String): Boolean {
     val (commands) = globalConfiguration.customCommands
     val allCommands = commands.mapValues {
-        { LocalPlayer.castAccessor(client.player).sendChatMessage(it.value) }
-    } + builtinCommands
+        { args: List<String> ->
+            LocalPlayer.castAccessor(client.player).sendChatMessage("${it.value} ${args.joinToString(" ")}")
+        }
+    } + builtinCommands + globalConfiguration.customCommands.loadedScripts
 
-    return allCommands[command.substringBefore(' ').removePrefix("/")]?.invoke() != null
+    val partialArgs = command.split(' ')
+    return allCommands[partialArgs.first().removePrefix("/")]?.invoke(partialArgs.drop(1)) != null
 }
 
 fun sendChatMessage(msg: String, color: String = "gray") = client.player.addChatMessage(

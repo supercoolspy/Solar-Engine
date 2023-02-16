@@ -71,10 +71,10 @@ fun initTweaks() {
         }
     }
 
-    withModule<Metadata> {
-        findLunarClass {
-            strings has "metadata_fallback.json"
-            methods {
+    findLunarClass {
+        strings has "metadata_fallback.json"
+        methods {
+            withModule<Metadata> {
                 "loadActions" {
                     strings has "blogPosts"
                     transform {
@@ -83,6 +83,21 @@ fun initTweaks() {
                         if (removeModSettings) replaceConstant("modSettings", "xdd")
                         if (removeServerIntegration) replaceConstant("serverIntegration", "xdd")
                         if (removePinnedServers) replaceConstant("pinnedServers", "xdd")
+                    }
+                }
+            }
+
+            withModule<MetadataURL> {
+                "makeRequest" {
+                    strings has "PROCESSOR_ARCHITECTURE"
+                    transform {
+                        callAdvice(
+                            matcher = { it.name == "create" && it.owner == "java/net/URI" },
+                            beforeCall = {
+                                pop()
+                                loadConstant(metadataURL)
+                            }
+                        )
                     }
                 }
             }
@@ -281,6 +296,9 @@ fun initTweaks() {
                 "clickMouseLegacyCombat" {
                     method references { field named "LEGACY_COMBAT" }
                     transform {
+                        // this is because this is a minecraft class
+                        disableFrameComputing()
+
                         overwrite {
                             load<Any>(1)
                             invokeMethod(

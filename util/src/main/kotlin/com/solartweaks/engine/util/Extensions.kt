@@ -3,6 +3,9 @@ package com.solartweaks.engine.util
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.*
+import org.objectweb.asm.util.TraceClassVisitor
+import java.io.ByteArrayOutputStream
+import java.io.PrintWriter
 import java.lang.instrument.Instrumentation
 import kotlin.reflect.KClass
 
@@ -327,3 +330,9 @@ val MethodNode.arguments: Array<Type> get() = Type.getArgumentTypes(desc)
  * Gets the return type of a [MethodNode]
  */
 val MethodNode.returnType: Type get() = Type.getReturnType(desc)
+
+fun ClassNode.debug(): String {
+    val bout = ByteArrayOutputStream()
+    accept(TraceClassVisitor(null, PrintWriter(bout)))
+    return bout.toByteArray().decodeToString()
+}

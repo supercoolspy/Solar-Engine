@@ -40,8 +40,4 @@ fun MethodData.asMethod(loader: ClassLoader = mainLoader) = loader.loadInternal(
 fun MethodData.tryInvoke(receiver: Any? = null, vararg params: Any?, method: Method = asMethod()) =
     method(receiver, *params)
 
-fun ClassNode.debug(): String {
-    val bout = ByteArrayOutputStream()
-    accept(TraceClassVisitor(null, PrintWriter(bout)))
-    return bout.toByteArray().decodeToString()
-}
+fun String.splitSingle(part: String) = substringBefore(part) to substringAfter(part)

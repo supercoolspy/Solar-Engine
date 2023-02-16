@@ -1,5 +1,5 @@
 # Features
-This is an auto-generated list of all the features that Solar Engine (v2.0.3) currently supports.
+This is an auto-generated list of all the features that Solar Engine (v2.0.5) currently supports.
 For every module, every option/property is listed as well.
 - Allow Cracked Accounts: Allows you to use cracked/offline Minecraft accounts on Lunar Client (remove all premium accounts to use)
   - Cracked Username: Set this field to the username you want
@@ -57,6 +57,8 @@ For every module, every option/property is listed as well.
 
 - Remove Profiles Cap: Removes the maximum profiles count of 8
 
+- Set Metadata URL: Sets the Metadata URL (don't use if you don't know what this means)
+  - Metadata URL: The new URL
 - Websocket: Allows you to modify the websocket URL that the client uses to fetch resources
   - URL: Paste the websocket URL you want to use here
 - Window Title: Allows you to set a custom title for the game's window

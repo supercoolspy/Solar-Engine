@@ -93,6 +93,7 @@ class MethodTransformContext(val owner: ClassNode, val method: MethodNode) {
     constructor(data: MethodData) : this(data.owner, data.method)
 
     internal var shouldExpandFrames = false
+    internal var allowComputeFrames = true
     internal val transforms = mutableListOf<MethodTransform>()
 
     /**
@@ -163,6 +164,13 @@ class MethodTransformContext(val owner: ClassNode, val method: MethodNode) {
      */
     fun expandFrames() {
         shouldExpandFrames = true
+    }
+
+    /**
+     * Disables frame computing (there are rare instances when this is neccesary)
+     */
+    fun disableFrameComputing() {
+        allowComputeFrames = false
     }
 
     /**
@@ -362,10 +370,11 @@ fun ClassNode.transformDefault(
     loader: ClassLoader,
     expand: Boolean = false,
     readerOptions: Int = ClassReader.SKIP_DEBUG,
+    computeFrames: Boolean = true,
     debug: Boolean = false
 ): ByteArray {
     val reader = ClassReader(originalBuffer)
-    val writer = LoaderClassWriter(loader, reader, ClassWriter.COMPUTE_FRAMES)
+    val writer = LoaderClassWriter(loader, reader, if (computeFrames) ClassWriter.COMPUTE_FRAMES else 0)
     return transform(
         transforms, reader, writer,
         if (expand) readerOptions or ClassReader.EXPAND_FRAMES else readerOptions, debug

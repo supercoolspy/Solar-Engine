@@ -79,13 +79,15 @@ class FinderContext(private val debug: Boolean = false) {
         ClassFinder(ClassContext().also(block)).also { finders += it }
 
     // Requests finders to visit the class and maybe request transformation
-    private fun offer(node: ClassNode, transform: Boolean) = finders.map { it.offer(node, transform) }
+    private fun offer(node: ClassNode, transform: Boolean) = finders.mapNotNull { f ->
+        runCatching { f.offer(node, transform) }
+            .onFailure { println("Failed to offer class ${node.name} to $f") ; it.printStackTrace() }
+            .getOrNull()
+    }
 
     private fun offer(node: ClassNode, name: String, transform: Boolean = false) =
-        runCatching { offer(node, transform) }.onFailure {
-            println("Failed to offer class $name")
-            it.printStackTrace()
-        }
+        runCatching { offer(node, transform) }
+            .onFailure { println("Failed to offer class $name"); it.printStackTrace() }
 
     /**
      * Registers this finding context with an instrumentation instance.
@@ -124,6 +126,7 @@ class FinderContext(private val debug: Boolean = false) {
 
                 // Find out if frames should be expanded
                 val shouldExpand = transformRequests.any { it.shouldExpand }
+                val computeFrames = transformRequests.all { it.allowComputeFrames }
 
                 // Find all method transforms
                 val transforms = transformRequests.flatMap { it.transforms }
@@ -137,7 +140,15 @@ class FinderContext(private val debug: Boolean = false) {
                 }
 
                 return try {
-                    node.transformDefault(transforms, classfileBuffer, loader, shouldExpand, debug = debug)
+                    // TODO: cleanup
+                    node.transformDefault(
+                        transforms,
+                        originalBuffer = classfileBuffer,
+                        loader,
+                        computeFrames = computeFrames,
+                        expand = shouldExpand,
+                        debug = debug
+                    )
                 } catch (e: Exception) {
                     println("Failed to transform class $className:")
                     e.printStackTrace()
@@ -223,6 +234,7 @@ class ClassFinder(internal val context: ClassContext) {
 
         // Find out if the frames should be expanded
         val shouldExpand = transformContexts.any { it.shouldExpandFrames }
+        val allowComputeFrames = transformContexts.all { it.allowComputeFrames }
 
         // Convert all method transformations to class transformations
         val methodTransformations = transformContexts.map { it.asClassTransform() }
@@ -232,13 +244,17 @@ class ClassFinder(internal val context: ClassContext) {
 
         // Return correct transform result
         return if (allTransformations.isEmpty()) NotInterested
-        else TransformRequest(allTransformations, shouldExpand)
+        else TransformRequest(allTransformations, shouldExpand, allowComputeFrames)
     }
 
     sealed class OfferResult
 
     // Returned when transform = true and this finder is interested in transforming
-    class TransformRequest(val transforms: List<ClassTransform>, val shouldExpand: Boolean) : OfferResult()
+    class TransformRequest(
+        val transforms: List<ClassTransform>,
+        val shouldExpand: Boolean,
+        val allowComputeFrames: Boolean
+    ) : OfferResult()
 
     // Returned when the class was found but the finder is not interested in transforming
     object NotInterested : OfferResult()

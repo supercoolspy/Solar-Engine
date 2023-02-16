@@ -17,6 +17,8 @@ val mainLoader by lazy {
 }
 
 fun premain(arg: String?, inst: Instrumentation) {
+    System.setProperty("polyglot.engine.WarnInterpreterOnly", "false")
+
     println("Solar Engine version $version")
 
     val configFile = File(arg ?: "config.json")
@@ -26,7 +28,6 @@ fun premain(arg: String?, inst: Instrumentation) {
     println("Configuration: $globalConfiguration")
 
     globalInstrumentation = inst
-
     finders.registerWith(inst)
     inst.installAntiClassLoader()
 

@@ -5,7 +5,6 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.util.StringJoiner
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KVisibility
@@ -66,7 +65,8 @@ data class Modules(
     val allowCrackedAccounts: AllowCrackedAccounts = AllowCrackedAccounts(),
     val fpsSpoof: FPSSpoof = FPSSpoof(),
     val noHitDelay: NoHitDelay = NoHitDelay(),
-    val infiniteEmotes: InfiniteEmotes = InfiniteEmotes()
+    val infiniteEmotes: InfiniteEmotes = InfiniteEmotes(),
+    val metadataURL: MetadataURL = MetadataURL()
 ) {
     val modules
         get() = serializedPropertiesOf<Modules>()
@@ -119,6 +119,7 @@ data class Metadata(
         "Removes advertisements of Lunar on the home screen of the client"
     )
     val removeBlogPosts: Boolean = false,
+
     override val isEnabled: Boolean = true
 ) : Module
 
@@ -368,6 +369,20 @@ data class NoHitDelay(override val isEnabled: Boolean = false) : Module
 data class InfiniteEmotes(override val isEnabled: Boolean = false) : Module
 
 @Serializable
+@ModuleInfo(
+    "Set Metadata URL",
+    "Sets the Metadata URL (don't use if you don't know what this means)"
+)
+data class MetadataURL(
+    @OptionInfo(
+        "Metadata URL",
+        "The new URL"
+    )
+    val metadataURL: String = "https://api.lunarclientprod.com/game/metadata",
+    override val isEnabled: Boolean = false
+) : Module
+
+@Serializable
 data class Schema(val modules: Map<String, ModuleDefinition>)
 
 @Serializable
@@ -410,7 +425,29 @@ fun schemaOfModules() = Schema(serializedPropertiesOf<Modules>()
 )
 
 @Serializable
-data class CustomCommands(val commands: Map<String, String> = mapOf())
+data class CustomCommands(
+    // name to execute
+    val commands: Map<String, String> = emptyMap(),
+    // name to script path (absolute)
+    val scripts: Map<String, String> = emptyMap()
+) {
+    @Transient
+    var loadedScripts = loadScripts()
+
+    private fun loadScripts() = if (isGraalLoaded) scripts.mapValues { (_, f) ->
+        runCatching {
+            val ctx = File(f).readText().asGraalContext()
+            return@runCatching { args: List<String> ->
+                runCatching { ctx.runCommand(args) }
+                    .onFailure { println("Failed to execute command from script $f:") ; it.printStackTrace() }
+            }
+        }.onFailure { println("Failed to load command script $f"); it.printStackTrace() }.getOrNull()
+    } else emptyMap()
+
+    fun reloadScripts() {
+        loadedScripts = loadScripts()
+    }
+}
 
 @Target(AnnotationTarget.CLASS)
 @Retention

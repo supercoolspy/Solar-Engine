@@ -180,6 +180,17 @@
             "displayName": "Metadata",
             "description": "Allows you to remove certain unwanted features from Lunar Client"
         },
+        "metadataURL": {
+            "options": {
+                "metadataURL": {
+                    "type": "STRING",
+                    "displayName": "Metadata URL",
+                    "description": "The new URL"
+                }
+            },
+            "displayName": "Set Metadata URL",
+            "description": "Sets the Metadata URL (don't use if you don't know what this means)"
+        },
         "noHitDelay": {
             "options": {
             },

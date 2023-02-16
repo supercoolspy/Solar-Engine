@@ -13,6 +13,7 @@ fun initBridge() = Unit
 val clientBridge = finders.findBridge {
     methods {
         bridgeMethod("getPlayer")
+        bridgeMethod("setDisplayTitle")
         bridgeMethod("hasInGameFocus")
         bridgeMethod("isWindowFocused")
         bridgeMethod("getCurrentServerData")
@@ -30,6 +31,7 @@ interface ClientBridge : InstanceAccessor {
     val currentScreen: Any?
     val isWindowFocused: Boolean
     fun hasInGameFocus(): Boolean
+    fun setDisplayTitle(title: String)
 
     interface Static : StaticAccessor<ClientBridge>
     companion object : Static by clientBridgeAccess.static
@@ -166,6 +168,7 @@ val playerGetMainModel by renderPlayer.methods["bridge\$getMainModel"]
 val worldBridge = finders.findBridge {
     methods {
         bridgeMethod("getPlayerEntities")
+        bridgeMethod("playSound")
     }
 }
 
@@ -173,6 +176,7 @@ val worldBridgeAccess by accessor<_, WorldBridge.Static>(worldBridge)
 
 interface WorldBridge {
     val playerEntities: List<Any>
+    fun playSound(x: Double, y: Double, z: Double, sound: String, volume: Float, pitch: Float, flag: Boolean)
 
     interface Static : StaticAccessor<WorldBridge>
     companion object : Static by worldBridgeAccess.static

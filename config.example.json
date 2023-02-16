@@ -87,11 +87,17 @@
             "isEnabled": false
         },
         "infiniteEmotes": {
-            "isEnabled": true
+            "isEnabled": false
+        },
+        "metadataURL": {
+            "metadataURL": "https://api.lunarclientprod.com/game/metadata",
+            "isEnabled": false
         }
     },
     "customCommands": {
         "commands": {
+        },
+        "scripts": {
         }
     },
     "debugPackets": false
