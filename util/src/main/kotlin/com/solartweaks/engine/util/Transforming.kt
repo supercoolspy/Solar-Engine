@@ -374,7 +374,8 @@ fun ClassNode.transformDefault(
     debug: Boolean = false
 ): ByteArray {
     val reader = ClassReader(originalBuffer)
-    val writer = LoaderClassWriter(loader, reader, if (computeFrames) ClassWriter.COMPUTE_FRAMES else 0)
+    val options = if (computeFrames) ClassWriter.COMPUTE_FRAMES else ClassWriter.COMPUTE_MAXS
+    val writer = LoaderClassWriter(loader, reader, options)
     return transform(
         transforms, reader, writer,
         if (expand) readerOptions or ClassReader.EXPAND_FRAMES else readerOptions, debug
