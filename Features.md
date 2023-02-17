@@ -1,5 +1,5 @@
 # Features
-This is an auto-generated list of all the features that Solar Engine (v2.0.6) currently supports.
+This is an auto-generated list of all the features that Solar Engine (v2.0.7) currently supports.
 For every module, every option/property is listed as well.
 - Allow Cracked Accounts: Allows you to use cracked/offline Minecraft accounts on Lunar Client (remove all premium accounts to use)
   - Cracked Username: Set this field to the username you want
