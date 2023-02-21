@@ -8,8 +8,6 @@ import java.util.*
 
 fun initBridge() = Unit
 
-//
-
 val clientBridge = finders.findBridge {
     methods {
         bridgeMethod("getPlayer")
@@ -37,8 +35,6 @@ interface ClientBridge : InstanceAccessor {
     companion object : Static by clientBridgeAccess.static
 }
 
-//
-
 val playerBridge = finders.findBridge {
     methods {
         bridgeMethod("getGameProfile")
@@ -64,8 +60,6 @@ fun MethodVisitor.getPlayerName() {
     invokeMethod(playerGetName())
 }
 
-//
-
 val gameProfile = finders.findClass {
     node named "com/mojang/authlib/GameProfile"
     methods {
@@ -84,8 +78,6 @@ interface GameProfile : InstanceAccessor {
     companion object : Static by gameProfileAccess.static
 }
 
-//
-
 val serverData = finders.findBridge {
     methods {
         bridgeMethod("serverIP")
@@ -102,8 +94,6 @@ interface ServerData : InstanceAccessor {
     interface Static : StaticAccessor<ServerData>
     companion object : Static by serverDataAccess.static
 }
-
-//
 
 val rendererBridge = finders.findBridge {
     methods {
@@ -129,8 +119,6 @@ interface GlStateBridge : InstanceAccessor {
     interface Static : StaticAccessor<GlStateBridge>
     companion object : Static by glStateAccess.static
 }
-
-//
 
 val renderPlayer = finders.findClass {
     methods {
@@ -163,8 +151,6 @@ val renderPlayer = finders.findClass {
 
 val playerGetMainModel by renderPlayer.methods["bridge\$getMainModel"]
 
-//
-
 val worldBridge = finders.findBridge {
     methods {
         bridgeMethod("getPlayerEntities")
@@ -184,8 +170,6 @@ interface WorldBridge {
 
 val WorldBridge.actualPlayerEntities get() = playerEntities.map(PlayerBridge::cast)
 
-//
-
 val localPlayer = finders.findBridge {
     methods {
         bridgeMethod("sendChatMessage")
@@ -201,8 +185,6 @@ interface LocalPlayer : InstanceAccessor {
     interface Static : StaticAccessor<LocalPlayer>
     companion object : Static by localPlayerAccess.static
 }
-
-//
 
 val bridgeManager = finders.findClass {
     fields {
@@ -229,8 +211,6 @@ val bridgeManager = finders.findClass {
         "getGlStateManager" { matchLazy { method returns rendererBridge() } }
     }
 }
-
-//
 
 val bridgeManagerAccess by accessor<_, BridgeManager.Static>(bridgeManager)
 

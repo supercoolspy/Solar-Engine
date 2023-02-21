@@ -1,6 +1,7 @@
 package com.solartweaks.engine
 
 import com.solartweaks.engine.util.*
+import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.ByteArrayOutputStream
@@ -15,6 +16,16 @@ fun MethodsContext.named(name: String, block: MethodContext.() -> Unit = {}) = n
 
 fun MethodsContext.namedTransform(name: String, block: MethodTransformContext.() -> Unit) = name {
     method named name
+    transform(block)
+}
+
+fun MethodsContext.clinit(block: MethodContext.() -> Unit) = "clinit" {
+    method.isStaticInit()
+    block()
+}
+
+fun MethodsContext.clinitTransform(block: MethodTransformContext.() -> Unit) = "clinit" {
+    method.isStaticInit()
     transform(block)
 }
 

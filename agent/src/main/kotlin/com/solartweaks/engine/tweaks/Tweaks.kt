@@ -7,6 +7,7 @@ import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.LdcInsnNode
 import java.net.URI
+import java.nio.ByteBuffer
 
 fun initTweaks() {
     findLunarClass {
@@ -127,12 +128,7 @@ fun initTweaks() {
                             )
 
                             val pipeStatus = "com/jagrosh/discordipc/entities/pipe/PipeStatus"
-                            visitFieldInsn(
-                                GETSTATIC,
-                                pipeStatus,
-                                "CONNECTED",
-                                "L$pipeStatus;"
-                            )
+                            visitFieldInsn(GETSTATIC, pipeStatus, "CONNECTED", "L$pipeStatus;")
 
                             val label = Label()
                             visitJumpInsn(IF_ACMPEQ, label)
@@ -207,7 +203,7 @@ fun initTweaks() {
 
                     transform {
                         val storeLdc = method.instructions.first { it is LdcInsnNode && it.cst == "store" }
-                        val storeButton = storeLdc.next<FieldInsnNode> { it.opcode == PUTFIELD }!!
+                        val storeButton = storeLdc.next<FieldInsnNode> { it.opcode == PUTFIELD }
                         val componentList = method.references
                             .find { it.opcode == GETFIELD && it.desc == "Ljava/util/List;" }
                             ?: error("Component list not found")
@@ -219,7 +215,13 @@ fun initTweaks() {
                             loadThis()
                             getField(storeButton)
 
-                            visitMethodInsn(INVOKEINTERFACE, "java/util/List", "remove", "(Ljava/lang/Object;)Z", true)
+                            invokeMethod(
+                                invocationType = InvocationType.INTERFACE,
+                                owner = "java/util/List",
+                                name = "remove",
+                                descriptor = "(Ljava/lang/Object;)Z",
+                            )
+
                             pop()
                         }
                     }
@@ -228,18 +230,32 @@ fun initTweaks() {
         }
     }
 
-    withModule<WebsocketURL> {
-        findLunarClass {
-            node extends "org/java_websocket/client/WebSocketClient"
-            methods {
-                "constructor" {
-                    method.isConstructor()
-                    strings has "Assets"
+    findLunarClass {
+        node extends "org/java_websocket/client/WebSocketClient"
+        methods {
+            "constructor" {
+                method.isConstructor()
+                strings has "Assets"
+                withModule<WebsocketURL> {
                     transform {
-                        callAdvice(matcher = { it.isConstructor && it.owner == internalNameOf<URI>() }, beforeCall = {
-                            pop()
-                            loadConstant(url)
-                        })
+                        callAdvice(
+                            matcher = { it.isConstructor && it.owner == internalNameOf<URI>() },
+                            beforeCall = {
+                                pop()
+                                loadConstant(url)
+                            }
+                        )
+                    }
+                }
+            }
+
+            named("onMessage") {
+                arguments[0] = ByteBuffer::class.asmType
+                transform {
+                    methodEnter {
+                        load<Any>(1)
+                        invokeMethod(ByteBuffer::array)
+                        invokeMethod(::handleWebsocketPacket)
                     }
                 }
             }

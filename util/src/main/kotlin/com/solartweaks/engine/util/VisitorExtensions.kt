@@ -5,7 +5,9 @@ import org.objectweb.asm.Handle
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
+import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldInsnNode
+import org.objectweb.asm.tree.FieldNode
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -78,13 +80,25 @@ fun MethodVisitor.getField(prop: KProperty<*>) = getField(
 /**
  * Loads a field by a field insn onto the stack
  */
-fun MethodVisitor.getField(insn: FieldInsnNode, static: Boolean = false) =
+fun MethodVisitor.getField(insn: FieldInsnNode, static: Boolean = insn.isStatic) =
     visitFieldInsn(if (static) GETSTATIC else GETFIELD, insn.owner, insn.name, insn.desc)
+
+/**
+ * Loads a field by a field node onto the stack
+ */
+fun MethodVisitor.getField(owner: ClassNode, node: FieldNode) =
+    visitFieldInsn(if (node.isStatic) GETSTATIC else GETFIELD, owner.name, node.name, node.desc)
+
+/**
+ * Puts the stack top value to the field defined by the field node
+ */
+fun MethodVisitor.setField(owner: ClassNode, node: FieldNode) =
+    visitFieldInsn(if (node.isStatic) PUTSTATIC else PUTFIELD, owner.name, node.name, node.desc)
 
 /**
  * Puts the stack top value to the field defined by the field insn
  */
-fun MethodVisitor.setField(insn: FieldInsnNode, static: Boolean = false) =
+fun MethodVisitor.setField(insn: FieldInsnNode, static: Boolean = insn.isStatic) =
     visitFieldInsn(if (static) PUTSTATIC else PUTFIELD, insn.owner, insn.name, insn.desc)
 
 /**

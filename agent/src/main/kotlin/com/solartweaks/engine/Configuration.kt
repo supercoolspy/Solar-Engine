@@ -302,8 +302,6 @@ data class RemoveMousePopup(override val isEnabled: Boolean = false) : Module
 )
 data class RemoveProfilesCap(override val isEnabled: Boolean = false) : Module
 
-//
-
 @Serializable
 @ModuleInfo(
     "Change Toggle Sprint Text",

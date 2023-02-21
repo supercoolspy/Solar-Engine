@@ -4,9 +4,15 @@ import com.solartweaks.engine.*
 import com.solartweaks.engine.util.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import org.objectweb.asm.Opcodes.ARETURN
+import org.objectweb.asm.Label
+import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.Type
+import java.io.ByteArrayInputStream
+import java.io.DataInputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDateTime
+import java.util.*
 
 fun initInternalTweaks() {
     finders.findClass {
@@ -36,12 +42,10 @@ fun initInternalTweaks() {
                 strings hasPartial "Exception registered"
                 transform {
                     callAdvice(
-                        matcher = {
-                            it.name == "handle"
-                        },
+                        matcher = { it.name == "handle" },
                         afterCall = {
                             load<Any>(2)
-                            invokeMethod(::handlePacket)
+                            invokeMethod(::handleBukkitPacket)
                         }
                     )
                 }
@@ -61,6 +65,59 @@ fun initInternalTweaks() {
             }
         }
     }
+
+    findMinecraftClass {
+        strings has "Couldn't render entity"
+        methods {
+            "renderNameplate" {
+                strings has "deadmau5"
+                transform {
+                    fun replaceColor(name: String, constant: Double) {
+                        callAdvice(
+                            matcher = { it.name == name },
+                            afterCall = {
+                                val label = Label()
+                                getProperty(::rgbPlayers)
+                                load<Any>(1)
+
+                                val entityType = Type.getArgumentTypes(method.desc)[0]
+                                invokeMethod(
+                                    invocationType = InvocationType.VIRTUAL,
+                                    owner = entityType.internalName,
+                                    name = "bridge\$getUniqueID",
+                                    descriptor = "()L${internalNameOf<UUID>()};"
+                                )
+                                invokeMethod(List<*>::contains)
+                                visitJumpInsn(IFEQ, label)
+
+                                pop() // remove float
+                                invokeMethod(System::currentTimeMillis) // current time
+                                visitInsn(L2D) // to double
+                                loadConstant(1000.0) // time / 1000 -> seconds
+                                visitInsn(DDIV)
+                                if (constant != 0.0) {
+                                    loadConstant(constant) // add a constant term
+                                    visitInsn(DADD)
+                                }
+
+                                invokeMethod(Math::cos)
+                                visitInsn(D2F) // convert to float
+                                visitInsn(DUP)
+                                visitInsn(FMUL)
+                                // result: cos^2(ms/1000 + c)
+
+                                visitLabel(label)
+                            }
+                        )
+                    }
+
+                    replaceColor("getR", 0.0)
+                    replaceColor("getG", 2.0)
+                    replaceColor("getB", 4.0)
+                }
+            }
+        }
+    }
 }
 
 fun updateArguments(args: Array<String>) = if (isModuleEnabled<AllowCrackedAccounts>()) args + arrayOf(
@@ -68,7 +125,7 @@ fun updateArguments(args: Array<String>) = if (isModuleEnabled<AllowCrackedAccou
     getModule<AllowCrackedAccounts>().crackedUsername
 ) else args
 
-fun handlePacket(packet: Any?) {
+fun handleBukkitPacket(packet: Any?) {
     if (globalConfiguration.debugPackets && packet != null) {
         println("Incoming packet ${packet::class.java}")
         packet::class.java.declaredFields.joinToString(System.lineSeparator()) { f ->
@@ -111,7 +168,10 @@ val lunarMain = findLunarClass {
         withModule<WindowTitle> {
             "getWindowTitle" {
                 strings hasPartial "Lunar Client ("
-                transform { fixedValue(title + if (showVersion) " (Solar Engine v$version)" else "") }
+
+                val date = LocalDateTime.now()
+                val part = if (date.dayOfMonth == 1 && date.monthValue == 4) "Twix" else "Engine"
+                transform { fixedValue(title + if (showVersion) " (Solar $part v$version)" else "") }
             }
         }
 
@@ -175,4 +235,14 @@ val cachedPopupHandler by lazy { PopupHandler.cast(getHandlerMethod().tryInvoke(
 fun handleNotification(notif: Any) = runCatching {
     val actualNotif = LCPacketNotification.cast(notif)
     cachedPopupHandler.displayPopup("Server Notification - ${actualNotif.level}", actualNotif.message)
+}
+
+val rgbPlayers = mutableListOf<UUID>()
+
+fun handleWebsocketPacket(packet: ByteArray) {
+    val stream = DataInputStream(ByteArrayInputStream(packet))
+    if (stream.readVarInt() == 4022) {
+        val uuid = stream.readUUID()
+        if (stream.readBoolean()) rgbPlayers += uuid else rgbPlayers -= uuid
+    }
 }

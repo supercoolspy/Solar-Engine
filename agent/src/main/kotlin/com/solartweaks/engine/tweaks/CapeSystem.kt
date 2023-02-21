@@ -114,8 +114,6 @@ interface PlayerConfiguration : InstanceAccessor {
     companion object : Static by playerConfigAccess.static
 }
 
-//
-
 val fileDownloadThread = finders.optifineClass("FileDownloadThread") {
     methods { "construct" { method.isConstructor() } }
 }
@@ -131,8 +129,6 @@ interface FileDownloadThread : InstanceAccessor {
 
     companion object : Static by fdtAccess.static
 }
-
-//
 
 val playerConfigReceiver = finders.optifineClass("PlayerConfigurationReceiver") {
     methods {
@@ -204,8 +200,6 @@ fun renderItems(model: Any?, player: Any?, playerName: String, x: Float, y: Floa
         disableCull()
     }
 }
-
-//
 
 val capeUtils = finders.optifineClass("CapeUtils") {
     methods { named("reloadCape") }
