@@ -1,5 +1,5 @@
 # Features
-This is an auto-generated list of all the features that Solar Engine (v2.0.7) currently supports.
+This is an auto-generated list of all the features that Solar Engine (v2.0.8) currently supports.
 For every module, every option/property is listed as well.
 - Allow Cracked Accounts: Allows you to use cracked/offline Minecraft accounts on Lunar Client (remove all premium accounts to use)
   - Cracked Username: Set this field to the username you want
@@ -53,9 +53,13 @@ For every module, every option/property is listed as well.
 
 - Privacy: Prevents Lunar Client from spying on your computer
 
+- Raw Mouse Input: Mouse input will no longer be jittery with high polling rates
+
 - Remove Fake Level Head: On Hypixel, nicked players will no longer get assigned a random level
 
 - Remove Profiles Cap: Removes the maximum profiles count of 8
+
+- Remove Store Button: Removes Lunar's store button from the main menu
 
 - Set Metadata URL: Sets the Metadata URL (don't use if you don't know what this means)
   - Metadata URL: The new URL

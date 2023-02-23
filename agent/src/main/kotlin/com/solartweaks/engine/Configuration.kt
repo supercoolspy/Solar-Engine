@@ -67,7 +67,8 @@ data class Modules(
     val fpsSpoof: FPSSpoof = FPSSpoof(),
     val noHitDelay: NoHitDelay = NoHitDelay(),
     val infiniteEmotes: InfiniteEmotes = InfiniteEmotes(),
-    val metadataURL: MetadataURL = MetadataURL()
+    val metadataURL: MetadataURL = MetadataURL(),
+    val rawInput: RawInput = RawInput()
 ) {
     val modules
         get() = serializedPropertiesOf<Modules>()
@@ -387,6 +388,13 @@ data class MetadataURL(
     val metadataURL: String = "https://api.lunarclientprod.com/game/metadata",
     override val isEnabled: Boolean = false
 ) : Module
+
+@Serializable
+@ModuleInfo(
+    "Raw Mouse Input",
+    "Mouse input will no longer be jittery with high polling rates"
+)
+data class RawInput(override val isEnabled: Boolean = false) : Module
 
 @Serializable
 data class Schema(val modules: Map<String, ModuleDefinition>)

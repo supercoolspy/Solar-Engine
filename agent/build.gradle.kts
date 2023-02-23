@@ -9,6 +9,9 @@ dependencies {
     implementation(project(":util"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     compileOnly("org.graalvm.js:js:22.3.1")
+
+    implementation("net.java.jinput:jinput:2.0.9")
+    implementation("net.java.jinput:jinput:2.0.9:natives-all")
 }
 
 tasks {

@@ -203,6 +203,12 @@
             "displayName": "Privacy",
             "description": "Prevents Lunar Client from spying on your computer"
         },
+        "rawInput": {
+            "options": {
+            },
+            "displayName": "Raw Mouse Input",
+            "description": "Mouse input will no longer be jittery with high polling rates"
+        },
         "removeFakeLevelHead": {
             "options": {
             },
@@ -220,6 +226,12 @@
             },
             "displayName": "Remove Profiles Cap",
             "description": "Removes the maximum profiles count of 8"
+        },
+        "removeStoreButton": {
+            "options": {
+            },
+            "displayName": "Remove Store Button",
+            "description": "Removes Lunar's store button from the main menu"
         },
         "toggleSprintText": {
             "options": {

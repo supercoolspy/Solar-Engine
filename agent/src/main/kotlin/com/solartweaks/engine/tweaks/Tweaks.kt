@@ -2,12 +2,16 @@ package com.solartweaks.engine.tweaks
 
 import com.solartweaks.engine.*
 import com.solartweaks.engine.util.*
-import org.objectweb.asm.*
+import net.java.games.input.ControllerEnvironment
+import net.java.games.input.Mouse
+import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
+import org.objectweb.asm.Type
 import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.LdcInsnNode
 import java.net.URI
 import java.nio.ByteBuffer
+import kotlin.reflect.KProperty
 
 fun initTweaks() {
     findLunarClass {
@@ -366,6 +370,78 @@ fun initTweaks() {
     withModule<InfiniteEmotes> {
         findNamedClass("mchorse/emoticons/common/emotes/Emote") {
             methods { namedTransform("shouldStopOnMove") { stubValue() } }
+        }
+    }
+
+    withModule<RawInput> {
+        findMinecraftClass {
+            methods {
+                "ctor" {
+                    method.isConstructor()
+                    transform {
+                        methodExit {
+                            getObject<RawInputThread>()
+                            invokeMethod(Thread::start)
+                        }
+                    }
+                }
+
+                "mouseXYChange" {
+                    fun matchMouseCall(name: String) = method calls {
+                        method named name
+                        method ownedBy Type.getObjectType("org/lwjgl/input/Mouse")
+                    }
+
+                    matchMouseCall("getDX")
+                    matchMouseCall("getDY")
+
+                    transform {
+                        fun replaceMouseCall(name: String, prop: KProperty<Float>) = replaceCall(
+                            matcher = { it.name == name },
+                            replacement = {
+                                getProperty(prop)
+                                visitInsn(F2I)
+                            }
+                        )
+
+                        replaceMouseCall("getDX", RawInputThread::dx)
+                        replaceMouseCall("getDY", RawInputThread::dy)
+                    }
+                }
+            }
+        }
+    }
+}
+
+object RawInputThread : Thread("SolarRawInput") {
+    @JvmStatic
+    var dx = 0f
+        get() {
+            val temp = field
+            field = 0f
+            return temp
+        }
+
+    @JvmStatic
+    var dy = 0f
+        get() {
+            val temp = field
+            field = 0f
+            return temp
+        }
+
+    override fun run() {
+        val env = ControllerEnvironment.getDefaultEnvironment()
+        while (true) {
+            env.controllers.forEach { mouse ->
+                if (mouse is Mouse) {
+                    mouse.poll()
+                    dx += mouse.x.pollData
+                    dy -= mouse.y.pollData
+                }
+            }
+
+            sleep(1)
         }
     }
 }

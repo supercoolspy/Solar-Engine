@@ -8,6 +8,9 @@
             "removeBlogPosts": false,
             "isEnabled": true
         },
+        "removeStoreButton": {
+            "isEnabled": false
+        },
         "discordRichPresence": {
             "clientID": "920998351430901790",
             "icon": "logo",
@@ -91,6 +94,9 @@
         },
         "metadataURL": {
             "metadataURL": "https://api.lunarclientprod.com/game/metadata",
+            "isEnabled": false
+        },
+        "rawInput": {
             "isEnabled": false
         }
     },
