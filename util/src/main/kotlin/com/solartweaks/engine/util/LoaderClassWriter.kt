@@ -8,9 +8,9 @@ import org.objectweb.asm.tree.ClassNode
  * Utility that ensures that asm can find inheritance info when writing a class.
  */
 class LoaderClassWriter(
-    private val loader: ClassLoader,
     reader: ClassReader? = null,
-    flags: Int,
+    flags: Int = 0,
+    private val loader: ClassLoader,
 ) : ClassWriter(reader, flags) {
     override fun getClassLoader() = loader
     private fun String.load() = loader.getResourceAsStream("$this.class")?.readBytes()?.asClassNode(0)
@@ -25,15 +25,18 @@ class LoaderClassWriter(
 
                 when {
                     node1.isInterface || node2.isInterface -> "java/lang/Object"
-                    else -> node1.getAllParents().toSet().intersect(node2.getAllParents().toSet())
-                        .firstOrNull() ?: "java/lang/Object"
+                    else -> {
+                        node1.getAllParents().intersect(node2.getAllParents().toSet())
+                            .firstOrNull() ?: return super.getCommonSuperClass(type1, type2)
+                    }
                 }
             }
         }
     }
 
-    private fun ClassNode.getAllParents(): List<String> = when {
-        superName == "java/lang/Object" || name == "java/lang/Object" -> emptyList()
-        else -> listOf(superName) + (superName.load()?.getAllParents() ?: listOf())
+    private fun ClassNode.getAllParents() = listOf(name) + getParents()
+    private fun ClassNode.getParents(): List<String> = when (name) {
+        "java/lang/Object" -> emptyList()
+        else -> listOf(superName) + (superName.load()?.getParents() ?: emptyList())
     }
 }

@@ -2,6 +2,7 @@ package com.solartweaks.engine.util
 
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
+import org.objectweb.asm.commons.AnalyzerAdapter
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.ByteArrayOutputStream
@@ -349,3 +350,15 @@ inline fun <reified T : AbstractInsnNode> AbstractInsnNode.next(block: (T) -> Bo
 }
 
 val FieldInsnNode.isStatic get() = opcode == GETSTATIC || opcode == PUTSTATIC
+
+// Dirty way of doing it if you ask me
+fun List<Any>.asFrameValues() = listOf(first()) + drop(1).filterIndexed { idx, e ->
+    val previous = this[idx]
+    previous != LONG && previous != DOUBLE || e != TOP
+}
+
+fun AnalyzerAdapter.addCurrentFrame() {
+    val frameLocals = locals.asFrameValues()
+    val frameStack = stack.asFrameValues()
+    visitFrame(F_NEW, frameLocals.size, frameLocals.toTypedArray(), frameStack.size, frameStack.toTypedArray())
+}

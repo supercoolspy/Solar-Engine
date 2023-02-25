@@ -7,6 +7,7 @@ import kotlinx.serialization.encodeToString
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
+import org.objectweb.asm.commons.AnalyzerAdapter
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.net.HttpURLConnection
@@ -72,48 +73,65 @@ fun initInternalTweaks() {
             "renderNameplate" {
                 strings has "deadmau5"
                 transform {
-                    fun replaceColor(name: String, constant: Double) {
-                        callAdvice(
-                            matcher = { it.name == name },
-                            afterCall = {
-                                val label = Label()
-                                getProperty(::rgbPlayers)
-                                load<Any>(1)
+                    disableFrameComputing()
+                    expandFrames()
 
-                                val entityType = Type.getArgumentTypes(method.desc)[0]
-                                invokeMethod(
-                                    invocationType = InvocationType.VIRTUAL,
-                                    owner = entityType.internalName,
-                                    name = "bridge\$getUniqueID",
-                                    descriptor = "()L${internalNameOf<UUID>()};"
-                                )
-                                invokeMethod(List<*>::contains)
-                                visitJumpInsn(IFEQ, label)
+                    val colorReplacements = mapOf(
+                        "getR" to 0.0,
+                        "getG" to 2.0,
+                        "getB" to 4.0
+                    )
 
-                                pop() // remove float
-                                invokeMethod(System::currentTimeMillis) // current time
-                                visitInsn(L2D) // to double
-                                loadConstant(1000.0) // time / 1000 -> seconds
-                                visitInsn(DDIV)
-                                if (constant != 0.0) {
-                                    loadConstant(constant) // add a constant term
-                                    visitInsn(DADD)
+                    visitor { parent ->
+                        object : AnalyzerAdapter(asmAPI, owner.name, method.access, method.name, method.desc, parent) {
+                            override fun visitMethodInsn(
+                                opcode: Int,
+                                owner: String,
+                                name: String,
+                                descriptor: String,
+                                isInterface: Boolean
+                            ) {
+                                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+                                if (name in colorReplacements) {
+                                    val label = Label()
+                                    getProperty(::rgbPlayers)
+                                    load<Any>(1)
+
+                                    val entityType = Type.getArgumentTypes(method.desc).first()
+                                    invokeMethod(
+                                        invocationType = InvocationType.VIRTUAL,
+                                        owner = entityType.internalName,
+                                        name = "bridge\$getUniqueID",
+                                        descriptor = "()L${internalNameOf<UUID>()};"
+                                    )
+
+                                    invokeMethod(Set<*>::contains)
+                                    visitJumpInsn(IFEQ, label)
+
+                                    pop() // remove float
+                                    invokeMethod(System::currentTimeMillis) // current time
+                                    visitInsn(L2D) // to double
+                                    loadConstant(1000.0) // time / 1000 -> seconds
+                                    visitInsn(DDIV)
+
+                                    val constant = colorReplacements.getValue(name)
+                                    if (constant != 0.0) {
+                                        loadConstant(constant) // add a constant term
+                                        visitInsn(DADD)
+                                    }
+
+                                    invokeMethod(Math::cos)
+                                    visitInsn(D2F) // convert to float
+                                    visitInsn(DUP)
+                                    visitInsn(FMUL)
+                                    // result: cos^2(ms/1000 + c)
+
+                                    visitLabel(label)
+                                    addCurrentFrame()
                                 }
-
-                                invokeMethod(Math::cos)
-                                visitInsn(D2F) // convert to float
-                                visitInsn(DUP)
-                                visitInsn(FMUL)
-                                // result: cos^2(ms/1000 + c)
-
-                                visitLabel(label)
                             }
-                        )
+                        }
                     }
-
-                    replaceColor("getR", 0.0)
-                    replaceColor("getG", 2.0)
-                    replaceColor("getB", 4.0)
                 }
             }
         }
@@ -237,7 +255,7 @@ fun handleNotification(notif: Any) = runCatching {
     cachedPopupHandler.displayPopup("Server Notification - ${actualNotif.level}", actualNotif.message)
 }
 
-val rgbPlayers = mutableListOf<UUID>()
+val rgbPlayers = hashSetOf<UUID>()
 
 fun handleWebsocketPacket(packet: ByteArray) {
     val stream = DataInputStream(ByteArrayInputStream(packet))

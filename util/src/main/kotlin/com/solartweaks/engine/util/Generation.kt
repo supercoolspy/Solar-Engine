@@ -67,8 +67,8 @@ inline fun ClassVisitor.generateMethod(
     name: String,
     descriptor: String,
     access: Int = Opcodes.ACC_PUBLIC,
-    maxStack: Int = -1,
-    maxLocals: Int = -1,
+    maxStack: Int = 0,
+    maxLocals: Int = 0,
     generator: MethodVisitor.() -> Unit
 ) = with(visitMethod(access, name, descriptor, null, null)) {
     visitCode()

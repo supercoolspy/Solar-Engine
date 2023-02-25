@@ -2,11 +2,7 @@ package com.solartweaks.engine.util
 
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.FieldInsnNode
-import org.objectweb.asm.tree.FieldNode
-import org.objectweb.asm.tree.MethodInsnNode
-import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.*
 import org.objectweb.asm.util.TraceClassVisitor
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
@@ -49,9 +45,11 @@ class FinderContext(private val debug: Boolean = false) {
                     finders -= finder // to avoid concurrent modifications
                 }
             }
+
             ClassFinder.Skip -> error("Newly initialized ClassFinder shouldn't skip!")
             is ClassFinder.TransformRequest ->
                 error("ClassFinder shouldn't return a TransformRequest when transform = false")
+
             ClassFinder.NoMatch -> if (requireMatch) error("Finder for ${node.name} didn't match")
             else -> {
                 /* we don't really care */
@@ -81,7 +79,7 @@ class FinderContext(private val debug: Boolean = false) {
     // Requests finders to visit the class and maybe request transformation
     private fun offer(node: ClassNode, transform: Boolean) = finders.mapNotNull { f ->
         runCatching { f.offer(node, transform) }
-            .onFailure { println("Failed to offer class ${node.name} to $f") ; it.printStackTrace() }
+            .onFailure { println("Failed to offer class ${node.name} to $f"); it.printStackTrace() }
             .getOrNull()
     }
 

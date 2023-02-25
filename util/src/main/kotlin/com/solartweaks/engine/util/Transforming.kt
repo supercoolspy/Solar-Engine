@@ -4,6 +4,7 @@ import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.util.CheckClassAdapter
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
@@ -121,7 +122,7 @@ class MethodTransformContext(val owner: ClassNode, val method: MethodNode) {
                 override fun visitCode() {
                     parent.visitCode()
                     parent.impl()
-                    parent.visitMaxs(-1, -1)
+                    parent.visitMaxs(0, 0)
                     parent.visitEnd()
                 }
 
@@ -349,8 +350,9 @@ fun ClassNode.transform(
     debug: Boolean = false
 ): ByteArray {
     val acc = ByteArrayOutputStream()
-    val visitor = if (debug) TraceClassVisitor(writer, PrintWriter(acc)) else writer
-    val transformer = transforms.fold(visitor, this)
+    val visitor = CheckClassAdapter(writer)
+    val finalVisitor = if (debug) TraceClassVisitor(visitor, PrintWriter(acc)) else visitor
+    val transformer = transforms.fold(finalVisitor, this)
     reader.accept(transformer, readerOptions)
 
     if (debug) {
@@ -375,7 +377,7 @@ fun ClassNode.transformDefault(
 ): ByteArray {
     val reader = ClassReader(originalBuffer)
     val options = if (computeFrames) ClassWriter.COMPUTE_FRAMES else ClassWriter.COMPUTE_MAXS
-    val writer = LoaderClassWriter(loader, reader, options)
+    val writer = LoaderClassWriter(reader, options, loader)
     return transform(
         transforms, reader, writer,
         if (expand) readerOptions or ClassReader.EXPAND_FRAMES else readerOptions, debug

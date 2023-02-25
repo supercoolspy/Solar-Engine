@@ -347,9 +347,7 @@ fun initTweaks() {
                 "clickMouseLegacyCombat" {
                     method references { field named "LEGACY_COMBAT" }
                     transform {
-                        // this is because this is a minecraft class
                         disableFrameComputing()
-
                         overwrite {
                             load<Any>(1)
                             invokeMethod(
@@ -375,6 +373,11 @@ fun initTweaks() {
 
     withModule<RawInput> {
         findMinecraftClass {
+            fun MethodContext.matchMouseCall(name: String) = method calls {
+                method named name
+                method ownedBy Type.getObjectType("org/lwjgl/input/Mouse")
+            }
+
             methods {
                 "ctor" {
                     method.isConstructor()
@@ -387,11 +390,6 @@ fun initTweaks() {
                 }
 
                 "mouseXYChange" {
-                    fun matchMouseCall(name: String) = method calls {
-                        method named name
-                        method ownedBy Type.getObjectType("org/lwjgl/input/Mouse")
-                    }
-
                     matchMouseCall("getDX")
                     matchMouseCall("getDY")
 
@@ -407,6 +405,12 @@ fun initTweaks() {
                         replaceMouseCall("getDX", RawInputThread::dx)
                         replaceMouseCall("getDY", RawInputThread::dy)
                     }
+                }
+
+                "setGrabbed" {
+                    matchMouseCall("setGrabbed")
+                    method references { field isType Type.INT_TYPE }
+                    transform { methodExit { invokeMethod(RawInputThread::resetMouse) } }
                 }
             }
         }
@@ -430,8 +434,19 @@ object RawInputThread : Thread("SolarRawInput") {
             return temp
         }
 
+    @JvmStatic
+    fun resetMouse() {
+        dx = 0f
+        dy = 0f
+    }
+
+    private var env: ControllerEnvironment = ControllerEnvironment.getDefaultEnvironment()
+    fun rescanMice() {
+        env = Class.forName("net.java.games.input.DefaultControllerEnvironment")
+            .getDeclaredConstructor().also { it.isAccessible = true }.newInstance() as ControllerEnvironment
+    }
+
     override fun run() {
-        val env = ControllerEnvironment.getDefaultEnvironment()
         while (true) {
             env.controllers.forEach { mouse ->
                 if (mouse is Mouse) {

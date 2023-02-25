@@ -128,6 +128,10 @@ val builtinCommands: Map<String, (List<String>) -> Unit> = mapOf(
     "reloadscripts" to {
         globalConfiguration.customCommands.reloadScripts()
         sendChatMessage("Done!", color = "green")
+    },
+    "reloadmice" to {
+        RawInputThread.rescanMice()
+        sendChatMessage("Done!", color = "green")
     }
 )
 
