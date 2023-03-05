@@ -1,12 +1,14 @@
 package com.solartweaks.engine
 
+import com.solartweaks.engine.tweaks.findLunarClass
+
 object VersionDummy
 
 val version by lazy {
     VersionDummy::class.java.classLoader.getResourceAsStream("version.txt")?.readBytes()?.decodeToString() ?: "unknown"
 }
 
-val lunarVersion = finders.findClass {
+val lunarVersion = findLunarClass {
     strings has "https://launchermeta.mojang.com/mc/game/version_manifest.json"
     fields { "id" { node named "id" } }
 }

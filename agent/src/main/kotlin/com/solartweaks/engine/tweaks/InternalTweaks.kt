@@ -16,8 +16,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 fun initInternalTweaks() {
-    finders.findClass {
-        node named "net/minecraft/client/ClientBrandRetriever"
+    findNamedClass("net/minecraft/client/ClientBrandRetriever") {
         methods {
             namedTransform("getClientModName") {
                 overwrite {
@@ -33,7 +32,7 @@ fun initInternalTweaks() {
         methods {
             namedTransform("handleNotification") {
                 overwrite {
-                    load<Any>(1)
+                    load(1)
                     invokeMethod(::handleNotification)
                     returnMethod()
                 }
@@ -45,7 +44,7 @@ fun initInternalTweaks() {
                     callAdvice(
                         matcher = { it.name == "handle" },
                         afterCall = {
-                            load<Any>(2)
+                            load(2)
                             invokeMethod(::handleBukkitPacket)
                         }
                     )
@@ -54,12 +53,11 @@ fun initInternalTweaks() {
         }
     }
 
-    finders.findClass {
-        node named "net/minecraft/client/main/Main"
+    findNamedClass("net/minecraft/client/main/Main") {
         methods {
             namedTransform("main") {
                 methodEnter {
-                    load<Array<String>>(0)
+                    load(0)
                     invokeMethod(::updateArguments)
                     store(0)
                 }
@@ -95,7 +93,7 @@ fun initInternalTweaks() {
                                 if (name in colorReplacements) {
                                     val label = Label()
                                     getProperty(::rgbPlayers)
-                                    load<Any>(1)
+                                    load(1)
 
                                     val entityType = Type.getArgumentTypes(method.desc).first()
                                     invokeMethod(
@@ -178,9 +176,7 @@ val lunarMain = findLunarClass {
     methods {
         "initLunar" {
             strings has "Starting Lunar client..."
-            transform {
-                methodExit { invokeMethod(::sendLaunch) }
-            }
+            transform { methodExit { invokeMethod(::sendLaunch) } }
         }
 
         withModule<WindowTitle> {
@@ -208,8 +204,7 @@ private data class LaunchRequest(val item: String, val version: String)
 // I was too lazy to manually import bukkit nethandler thingy
 // have some more codegen
 
-val lcPacketNotification = finders.findClass {
-    node named "com/lunarclient/bukkitapi/nethandler/client/LCPacketNotification"
+val lcPacketNotification = findNamedClass("com/lunarclient/bukkitapi/nethandler/client/LCPacketNotification") {
     methods {
         named("getMessage")
         named("getLevel")
@@ -264,3 +259,5 @@ fun handleWebsocketPacket(packet: ByteArray) {
         if (stream.readBoolean()) rgbPlayers += uuid else rgbPlayers -= uuid
     }
 }
+
+fun clearRGBPlayers() = rgbPlayers.clear()

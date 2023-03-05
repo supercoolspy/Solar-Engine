@@ -23,7 +23,7 @@ fun initCapeSystemTweaks() {
                 namedTransform("getPlayerConfiguration") {
                     whenImplementItems {
                         getObject<ConfigRegistry>()
-                        load<Any>(0)
+                        load(0)
                         getPlayerName()
                         invokeMethod(ConfigRegistry::class.java.getMethod("getRawConfig", String::class.java))
                         cast(method.returnType)
@@ -34,8 +34,8 @@ fun initCapeSystemTweaks() {
                 namedTransform("setPlayerConfiguration") {
                     whenImplementItems {
                         getObject<ConfigRegistry>()
-                        load<Any>(0)
-                        load<Any>(1)
+                        load(0)
+                        load(1)
                         invokeMethod(
                             ConfigRegistry::class.java.getMethod(
                                 "setConfig",
@@ -63,11 +63,11 @@ fun initCapeSystemTweaks() {
                             getField(field)
                             cast(renderPlayer().type)
                             invokeMethod(playerGetMainModel())
-                            load<Any>(1)
+                            load(1)
                             dup()
                             getPlayerName()
-                            load<Float>(2)
-                            load<Float>(3)
+                            load(2, FLOAD)
+                            load(3, FLOAD)
                             invokeMethod(::renderItems)
                             returnMethod()
                         }

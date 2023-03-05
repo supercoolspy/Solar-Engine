@@ -201,20 +201,6 @@ fun MethodVisitor.load(index: Int, opcode: Int = ALOAD) {
 fun MethodVisitor.load(index: Int, type: Type) = load(index, type.getOpcode(ILOAD))
 
 /**
- * Loads local variable with [index] onto stack based with type [T]
- */
-inline fun <reified T : Any> MethodVisitor.load(index: Int) =
-    load(
-        index, when (T::class) {
-            Boolean::class, Byte::class, Char::class, Int::class, Short::class -> ILOAD
-            Float::class -> FLOAD
-            Long::class -> LLOAD
-            Double::class -> DLOAD
-            else -> ALOAD
-        }
-    )
-
-/**
  * Loads a `this` value onto the stack, or the first argument of a method when the method is static
  */
 fun MethodVisitor.loadThis() = visitVarInsn(ALOAD, 0)
@@ -539,15 +525,16 @@ fun MethodVisitor.loadTypeClass(type: Type) = when (type.sort) {
 /**
  * Retrieves the classname of a primitive type's boxed class
  */
-val Type.boxedType get() = when(sort) {
-    Type.CHAR -> "java/lang/Character"
-    Type.BOOLEAN -> "java/lang/Boolean"
-    Type.INT -> "java/lang/Integer"
-    Type.LONG -> "java/lang/Long"
-    Type.FLOAT -> "java/lang/Float"
-    Type.DOUBLE -> "java/lang/Double"
-    Type.BYTE -> "java/lang/Byte"
-    Type.SHORT -> "java/lang/Short"
-    Type.VOID -> "java/lang/Void"
-    else -> error("type isn't primitive")
-}
+val Type.boxedType
+    get() = when (sort) {
+        Type.CHAR -> "java/lang/Character"
+        Type.BOOLEAN -> "java/lang/Boolean"
+        Type.INT -> "java/lang/Integer"
+        Type.LONG -> "java/lang/Long"
+        Type.FLOAT -> "java/lang/Float"
+        Type.DOUBLE -> "java/lang/Double"
+        Type.BYTE -> "java/lang/Byte"
+        Type.SHORT -> "java/lang/Short"
+        Type.VOID -> "java/lang/Void"
+        else -> error("type isn't primitive")
+    }

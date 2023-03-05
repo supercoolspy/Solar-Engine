@@ -137,12 +137,6 @@
             "displayName": "Hurt Camera Multiplier",
             "description": "Changes how much the camera shakes when taking damage"
         },
-        "infiniteEmotes": {
-            "options": {
-            },
-            "displayName": "Infinite Emotes",
-            "description": "Allows you to always use emotes, even when walking"
-        },
         "lunarOverlays": {
             "options": {
             },
@@ -278,6 +272,12 @@
             },
             "displayName": "Change Toggle Sprint Text",
             "description": "Allows you to change the text shown by the Toggle Sprint/Sneak mod"
+        },
+        "traversalEmotes": {
+            "options": {
+            },
+            "displayName": "Traversal Emotes",
+            "description": "Allows you to always use emotes, even when walking"
         },
         "websocketURL": {
             "options": {

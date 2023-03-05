@@ -32,8 +32,7 @@ fun updateRichPresence() = with(RPCBuilder.construct()) {
     build()
 }
 
-val rpcBuilder = finders.findClass {
-    node named "com/jagrosh/discordipc/entities/RichPresence\$Builder"
+val rpcBuilder = findNamedClass("com/jagrosh/discordipc/entities/RichPresence\$Builder") {
     methods {
         named("setState")
         named("setDetails")

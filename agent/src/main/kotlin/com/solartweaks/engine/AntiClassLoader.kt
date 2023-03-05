@@ -2,8 +2,7 @@ package com.solartweaks.engine
 
 import com.solartweaks.engine.util.*
 import org.objectweb.asm.Label
-import org.objectweb.asm.Opcodes.ARETURN
-import org.objectweb.asm.Opcodes.IFEQ
+import org.objectweb.asm.Opcodes.*
 import java.lang.instrument.ClassFileTransformer
 import java.lang.instrument.Instrumentation
 import java.net.URLClassLoader
@@ -51,7 +50,7 @@ fun Instrumentation.installAntiClassLoader(debug: Boolean = false) {
                         val label = Label()
 
                         // Class name (binary)
-                        load<String>(1)
+                        load(1)
 
                         // Check if the class is a system class
                         invokeMethod(::isSystemClass)
@@ -62,7 +61,7 @@ fun Instrumentation.installAntiClassLoader(debug: Boolean = false) {
                         if (debug) visitPrintln {
                             concat {
                                 appendString("Preventing ")
-                                appendString { load<String>(1) }
+                                appendString { load(1) }
                                 appendString(" to get loaded by ${node.name}")
                             }
                         }
@@ -71,10 +70,10 @@ fun Instrumentation.installAntiClassLoader(debug: Boolean = false) {
                         loadThis()
 
                         // Class name
-                        load<String>(1)
+                        load(1)
 
                         // `resolve`
-                        if (method.name == "loadClass") load<Boolean>(2)
+                        if (method.name == "loadClass") load(2, ILOAD)
 
                         // Invoke super
                         invokeMethod(InvocationType.SPECIAL, node.superName, method.name, method.desc)

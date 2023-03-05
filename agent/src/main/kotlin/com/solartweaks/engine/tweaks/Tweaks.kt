@@ -257,11 +257,15 @@ fun initTweaks() {
                 arguments[0] = ByteBuffer::class.asmType
                 transform {
                     methodEnter {
-                        load<Any>(1)
+                        load(1)
                         invokeMethod(ByteBuffer::array)
                         invokeMethod(::handleWebsocketPacket)
                     }
                 }
+            }
+
+            named("onOpen") {
+                transform { methodEnter { invokeMethod(::clearRGBPlayers) } }
             }
         }
     }
@@ -280,8 +284,7 @@ fun initTweaks() {
     }
 
     withModule<HurtCamShake> {
-        finders.findClass {
-            isMinecraftClass()
+        findMinecraftClass {
             strings has "Failed to load shader: "
             constantReplacement(14.0f, 14.0f * multiplier)
         }
@@ -349,7 +352,7 @@ fun initTweaks() {
                     transform {
                         disableFrameComputing()
                         overwrite {
-                            load<Any>(1)
+                            load(1)
                             invokeMethod(
                                 invocationType = InvocationType.VIRTUAL,
                                 owner = "org/spongepowered/asm/mixin/injection/callback/CallbackInfo",
@@ -365,7 +368,7 @@ fun initTweaks() {
         }
     }
 
-    withModule<InfiniteEmotes> {
+    withModule<TraversalEmotes> {
         findNamedClass("mchorse/emoticons/common/emotes/Emote") {
             methods { namedTransform("shouldStopOnMove") { stubValue() } }
         }

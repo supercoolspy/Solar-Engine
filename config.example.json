@@ -89,7 +89,7 @@
         "noHitDelay": {
             "isEnabled": false
         },
-        "infiniteEmotes": {
+        "traversalEmotes": {
             "isEnabled": false
         },
         "metadataURL": {

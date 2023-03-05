@@ -1,5 +1,7 @@
 package com.solartweaks.engine
 
+import com.solartweaks.engine.tweaks.findMinecraftClass
+import com.solartweaks.engine.tweaks.findNamedClass
 import com.solartweaks.engine.tweaks.withModule
 import com.solartweaks.engine.util.*
 import org.objectweb.asm.MethodVisitor
@@ -60,8 +62,7 @@ fun MethodVisitor.getPlayerName() {
     invokeMethod(playerGetName())
 }
 
-val gameProfile = finders.findClass {
-    node named "com/mojang/authlib/GameProfile"
+val gameProfile = findNamedClass("com/mojang/authlib/GameProfile") {
     methods {
         named("getId")
         named("getName")
@@ -120,7 +121,7 @@ interface GlStateBridge : InstanceAccessor {
     companion object : Static by glStateAccess.static
 }
 
-val renderPlayer = finders.findClass {
+val renderPlayer = findMinecraftClass {
     methods {
         named("bridge\$getMainModel")
         "constructor" {

@@ -324,7 +324,7 @@ fun generateAccessor(data: AccessorData<*, *>): Class<*> {
 
                 // Initialize delegate field
                 loadThis()
-                load<Any>(1)
+                load(1)
 
                 if (data.fullReflect) {
                     loadConstant(binaryFoundName)
@@ -367,7 +367,7 @@ inline fun <reified T : StaticAccessor<*>> generateStaticAccessor(data: Accessor
             generateMethod("cast", "(Ljava/lang/Object;)Ljava/lang/Object;") {
                 construct(virtualAccessor.internalName, "(Ljava/lang/Object;)V") {
                     // Load receiver/first constructor param
-                    load(1, ALOAD)
+                    load(1)
                 }
 
                 returnMethod(ARETURN)
@@ -375,7 +375,7 @@ inline fun <reified T : StaticAccessor<*>> generateStaticAccessor(data: Accessor
 
             generateMethod("isInstance", "(Ljava/lang/Object;)Z") {
                 // Load receiver
-                load(1, ALOAD)
+                load(1)
 
                 // Check with INSTANCEOF
                 visitTypeInsn(INSTANCEOF, foundClass.name)

@@ -66,7 +66,7 @@ data class Modules(
     val allowCrackedAccounts: AllowCrackedAccounts = AllowCrackedAccounts(),
     val fpsSpoof: FPSSpoof = FPSSpoof(),
     val noHitDelay: NoHitDelay = NoHitDelay(),
-    val infiniteEmotes: InfiniteEmotes = InfiniteEmotes(),
+    val traversalEmotes: TraversalEmotes = TraversalEmotes(),
     val metadataURL: MetadataURL = MetadataURL(),
     val rawInput: RawInput = RawInput()
 ) {
@@ -370,10 +370,10 @@ data class NoHitDelay(override val isEnabled: Boolean = false) : Module
 
 @Serializable
 @ModuleInfo(
-    "Infinite Emotes",
+    "Traversal Emotes",
     "Allows you to always use emotes, even when walking"
 )
-data class InfiniteEmotes(override val isEnabled: Boolean = false) : Module
+data class TraversalEmotes(override val isEnabled: Boolean = false) : Module
 
 @Serializable
 @ModuleInfo(
@@ -453,7 +453,7 @@ data class CustomCommands(
             val ctx = File(f).readText().asGraalContext()
             return@runCatching { args: List<String> ->
                 runCatching { ctx.runCommand(args) }
-                    .onFailure { println("Failed to execute command from script $f:") ; it.printStackTrace() }
+                    .onFailure { println("Failed to execute command from script $f:"); it.printStackTrace() }
             }
         }.onFailure { println("Failed to load command script $f"); it.printStackTrace() }.getOrNull()
     } else emptyMap()

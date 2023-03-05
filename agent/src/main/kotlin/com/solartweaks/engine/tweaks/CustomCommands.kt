@@ -19,11 +19,11 @@ fun initCustomCommands() {
 
                 transform {
                     methodExit {
-                        load<String>(1)
+                        load(1)
                         invokeMethod(::handleCommand)
                         val label = Label()
                         visitJumpInsn(IFEQ, label)
-                        load<Any>(2)
+                        load(2)
                         invokeMethod(
                             invocationType = InvocationType.VIRTUAL,
                             owner = callbackName,
