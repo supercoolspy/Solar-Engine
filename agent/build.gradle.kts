@@ -5,16 +5,19 @@ plugins {
     kotlin("plugin.serialization")
 }
 
-val graal: Configuration by configurations.creating { configurations.compileOnly.get().extendsFrom(this) }
+val scripts: Configuration by configurations.creating { configurations.compileOnly.get().extendsFrom(this) }
 
 dependencies {
     implementation(project(":util"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-    graal("org.graalvm.js:js:22.3.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta")
+    scripts("org.graalvm.js:js:22.3.1")
 
     implementation("net.java.jinput:jinput:2.0.9")
     implementation("net.java.jinput:jinput:2.0.9:natives-all")
 }
+
+kotlin { jvmToolchain(16) }
 
 tasks {
     processResources {
@@ -68,10 +71,10 @@ tasks {
 
     // This exists so the launcher can consume the api jar separately
     register<Jar>("jsAPIJar") {
-        archiveBaseName.set("graal-js-api")
+        archiveBaseName.set("js-api")
         archiveVersion.set(provider { null })
 
-        from(graal.map { zipTree(it) })
+        from(scripts.map { zipTree(it) })
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 }

@@ -30,8 +30,8 @@
             "isEnabled": false
         },
         "capeSystem": {
-            "serverURL": "http://s.optifine.net",
-            "isEnabled": false
+            "serverURL": "http://server.cloaksplus.com",
+            "isEnabled": true
         },
         "changeModStrings": {
             "nickhiderText": "You",
@@ -97,6 +97,9 @@
             "isEnabled": false
         },
         "rawInput": {
+            "isEnabled": false
+        },
+        "accurateReachDisplay": {
             "isEnabled": false
         }
     },

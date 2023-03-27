@@ -4,7 +4,6 @@ import org.objectweb.asm.*
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.MethodNode
-import org.objectweb.asm.util.CheckClassAdapter
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
@@ -81,6 +80,27 @@ class ClassTransformContext(val node: ClassNode) {
      */
     fun add(transform: ClassTransform) {
         transforms += transform
+    }
+
+    /**
+     * Allows you to visit every method
+     */
+    fun methodVisitor(visitor: MethodTransform) {
+        add { parent, node ->
+            object : ClassVisitor(asmAPI, parent) {
+                override fun visitMethod(
+                    access: Int,
+                    name: String,
+                    descriptor: String,
+                    signature: String?,
+                    exceptions: Array<String>?
+                ): MethodVisitor {
+                    val mv = super.visitMethod(access, name, descriptor, signature, exceptions)
+                    val method = node.methods.first { it.name == name && it.desc == descriptor }
+                    return visitor(mv, MethodData(node, method))
+                }
+            }
+        }
     }
 
     // TODO: dsls for specific sorts of transforms
@@ -168,7 +188,7 @@ class MethodTransformContext(val owner: ClassNode, val method: MethodNode) {
     }
 
     /**
-     * Disables frame computing (there are rare instances when this is neccesary)
+     * Disables frame computing (there are rare instances when this is necessary)
      */
     fun disableFrameComputing() {
         allowComputeFrames = false
@@ -337,6 +357,11 @@ class MethodTransformContext(val owner: ClassNode, val method: MethodNode) {
      * Converts this [MethodContext] to a [ClassTransform]
      */
     fun asClassTransform() = transforms.asClassTransform(method.asDescription(owner))
+
+    /**
+     * Converts this [MethodContext] to a [MethodVisitor]
+     */
+    fun asMethodVisitor(parent: MethodVisitor) = transforms.fold(parent, MethodData(owner, method))
 }
 
 /**
@@ -350,9 +375,8 @@ fun ClassNode.transform(
     debug: Boolean = false
 ): ByteArray {
     val acc = ByteArrayOutputStream()
-    val visitor = CheckClassAdapter(writer)
-    val finalVisitor = if (debug) TraceClassVisitor(visitor, PrintWriter(acc)) else visitor
-    val transformer = transforms.fold(finalVisitor, this)
+    val visitor = if (debug) TraceClassVisitor(writer, PrintWriter(acc)) else writer
+    val transformer = transforms.fold(visitor, this)
     reader.accept(transformer, readerOptions)
 
     if (debug) {

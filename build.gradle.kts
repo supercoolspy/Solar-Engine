@@ -1,11 +1,11 @@
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.8.0" apply false
     kotlin("plugin.serialization") version "1.8.0" apply false
 }
 
 allprojects {
     group = "com.solartweaks"
-    version = "2.0.9"
+    version = "2.1.0"
 
     repositories {
         mavenCentral()
@@ -17,5 +17,3 @@ tasks {
         dependsOn(":agent:updaterConfig", ":agent:generateConfigurations", ":agent:generateFeatures")
     }
 }
-
-kotlin { jvmToolchain(16) }

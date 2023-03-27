@@ -1,5 +1,11 @@
 {
     "modules": {
+        "accurateReachDisplay": {
+            "options": {
+            },
+            "displayName": "Accurate Reach Display",
+            "description": "Removes Lunar Client's built-in reach display cap of 3.0 blocks"
+        },
         "allowCrackedAccounts": {
             "options": {
                 "crackedUsername": {

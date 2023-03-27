@@ -23,6 +23,8 @@ data class MethodDescription(
 fun MethodDescription.isSimilar(desc: MethodDescription) =
     name == desc.name && descriptor == desc.descriptor && owner == desc.owner
 
+fun MethodDescription.isSimilar(data: MethodData) = isSimilar(data.asDescription())
+
 /**
  * Whether the described method is `public`
  */

@@ -593,10 +593,17 @@ class ClassContext {
     fun fields(block: FieldsContext.() -> Unit) = fieldsContext.block()
 
     /**
-     * Allows you to transform this method when all matchers match
+     * Allows you to transform this class when all matchers match
      */
     fun transform(block: ClassTransformContext.() -> Unit) {
         transformations += block
+    }
+
+    /**
+     * Allows you to transform all methods when all matchers match
+     */
+    fun transformMethods(block: MethodTransformContext.() -> Unit) = transform {
+        methodVisitor { parent, data -> MethodTransformContext(data).also(block).asMethodVisitor(parent) }
     }
 
     /**

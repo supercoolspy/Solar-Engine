@@ -1,6 +1,8 @@
 # Features
 This is an auto-generated list of all the features that Solar Engine (v2.0.9) currently supports.
 For every module, every option/property is listed as well.
+- Accurate Reach Display: Removes Lunar Client's built-in reach display cap of 3.0 blocks
+
 - Allow Cracked Accounts: Allows you to use cracked/offline Minecraft accounts on Lunar Client (remove all premium accounts to use)
   - Cracked Username: Set this field to the username you want
 - Cape System: Allows you to change the cape/cosmetics system that the client will use

@@ -5,6 +5,7 @@ import com.solartweaks.engine.util.*
 import net.java.games.input.ControllerEnvironment
 import net.java.games.input.Mouse
 import org.objectweb.asm.Label
+import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.FieldInsnNode
@@ -333,6 +334,16 @@ fun initTweaks() {
     }
 
     withModule<AllowCrackedAccounts> {
+        val jsonHandler = findLunarClass {
+            node.isInterface()
+            strings has "Loaded File: [%s]"
+            methods {
+                "save" { method returns Type.VOID_TYPE }
+            }
+        }
+
+        val save by jsonHandler.methods
+
         findLunarClass {
             strings has "launcher_accounts.json"
             methods {
@@ -340,6 +351,18 @@ fun initTweaks() {
                     method calls { method named "canPlayOnline" }
                     transform { fixedValue(true) }
                 }
+
+                "load" {
+                    strings has "Double Account, getting the newer one so we're skipping this one."
+                    transform { stubValue() }
+                }
+            }
+
+            transformMethods {
+                replaceCall(
+                    matcher = { it.isSimilar(save()) },
+                    replacement = { pop() }
+                )
             }
         }
     }
@@ -418,9 +441,25 @@ fun initTweaks() {
             }
         }
     }
+
+    withModule<AccurateReachDisplay> {
+        findLunarClass {
+            strings has "[1.3 blocks]"
+            methods {
+                "text" {
+                    strings has "\u0001 blocks"
+                    transform { replaceConstant(3.0, Double.MAX_VALUE) }
+                }
+            }
+        }
+    }
 }
 
 object RawInputThread : Thread("SolarRawInput") {
+    init {
+        isDaemon = true
+    }
+
     @JvmStatic
     var dx = 0f
         get() {

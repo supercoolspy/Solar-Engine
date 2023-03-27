@@ -68,7 +68,8 @@ data class Modules(
     val noHitDelay: NoHitDelay = NoHitDelay(),
     val traversalEmotes: TraversalEmotes = TraversalEmotes(),
     val metadataURL: MetadataURL = MetadataURL(),
-    val rawInput: RawInput = RawInput()
+    val rawInput: RawInput = RawInput(),
+    val accurateReachDisplay: AccurateReachDisplay = AccurateReachDisplay()
 ) {
     val modules
         get() = serializedPropertiesOf<Modules>()
@@ -203,8 +204,8 @@ data class RemoveFakeLevelHead(override val isEnabled: Boolean = false) : Module
 )
 data class CapeSystem(
     @OptionInfo("Server URL", "Paste the server URL here")
-    val serverURL: String = "http://s.optifine.net",
-    override val isEnabled: Boolean = false
+    val serverURL: String = "http://server.cloaksplus.com",
+    override val isEnabled: Boolean = true
 ) : Module
 
 @Serializable
@@ -397,6 +398,13 @@ data class MetadataURL(
 data class RawInput(override val isEnabled: Boolean = false) : Module
 
 @Serializable
+@ModuleInfo(
+    "Accurate Reach Display",
+    "Removes Lunar Client's built-in reach display cap of 3.0 blocks"
+)
+data class AccurateReachDisplay(override val isEnabled: Boolean = false) : Module
+
+@Serializable
 data class Schema(val modules: Map<String, ModuleDefinition>)
 
 @Serializable
@@ -450,7 +458,7 @@ data class CustomCommands(
 
     private fun loadScripts() = if (isGraalLoaded) scripts.mapValues { (_, f) ->
         runCatching {
-            val ctx = File(f).readText().asGraalContext()
+            val ctx = File(f).asGraalContext()
             return@runCatching { args: List<String> ->
                 runCatching { ctx.runCommand(args) }
                     .onFailure { println("Failed to execute command from script $f:"); it.printStackTrace() }

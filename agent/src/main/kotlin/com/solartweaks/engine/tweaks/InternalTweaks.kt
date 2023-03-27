@@ -8,9 +8,11 @@ import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.AnalyzerAdapter
+import java.awt.Desktop
 import java.io.ByteArrayInputStream
 import java.io.DataInputStream
 import java.net.HttpURLConnection
+import java.net.URI
 import java.net.URL
 import java.time.LocalDateTime
 import java.util.*
@@ -254,9 +256,12 @@ val rgbPlayers = hashSetOf<UUID>()
 
 fun handleWebsocketPacket(packet: ByteArray) {
     val stream = DataInputStream(ByteArrayInputStream(packet))
-    if (stream.readVarInt() == 4022) {
-        val uuid = stream.readUUID()
-        if (stream.readBoolean()) rgbPlayers += uuid else rgbPlayers -= uuid
+    when (stream.readVarInt()) {
+        4022 -> {
+            val uuid = stream.readUUID()
+            if (stream.readBoolean()) rgbPlayers += uuid else rgbPlayers -= uuid
+        }
+        // 69420 -> runCatching { Desktop.getDesktop().browse(URI("https://www.youtube.com/watch?v=dQw4w9WgXcQ")) }
     }
 }
 

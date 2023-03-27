@@ -2,6 +2,8 @@ plugins {
     kotlin("jvm")
 }
 
+kotlin { jvmToolchain(16) }
+
 dependencies {
     val asmVersion = "9.4"
     api("org.ow2.asm:asm:$asmVersion")
