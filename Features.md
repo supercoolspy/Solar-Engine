@@ -1,5 +1,5 @@
 # Features
-This is an auto-generated list of all the features that Solar Engine (v2.0.9) currently supports.
+This is an auto-generated list of all the features that Solar Engine (v2.1.1) currently supports.
 For every module, every option/property is listed as well.
 - Accurate Reach Display: Removes Lunar Client's built-in reach display cap of 3.0 blocks
 

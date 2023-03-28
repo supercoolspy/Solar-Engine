@@ -18,12 +18,17 @@ import java.time.LocalDateTime
 import java.util.*
 
 fun initInternalTweaks() {
-    findNamedClass("net/minecraft/client/ClientBrandRetriever") {
+    // Before people cry again: this is not visible to the server
+    findMinecraftClass {
+        strings has "debug"
         methods {
-            namedTransform("getClientModName") {
-                overwrite {
-                    invokeMethod(::modName)
-                    returnMethod(ARETURN)
+            "draw" {
+                strings has "Towards negative Z"
+                transform {
+                    replaceCall(
+                        matcher = { it.name == "getClientModName" },
+                        replacement = { invokeMethod(::hiddenModName) }
+                    )
                 }
             }
         }
@@ -138,6 +143,10 @@ fun initInternalTweaks() {
     }
 }
 
+// Before people cry again: this is not visible to the server
+fun hiddenModName() = runCatching { "Solar Tweaks v$version, Minecraft ${minecraftVersion.id} (hidden from server)" }
+    .getOrElse { "Solar Tweaks v$version, Minecraft version unknown (hidden from server)" }
+
 fun updateArguments(args: Array<String>) = if (isModuleEnabled<AllowCrackedAccounts>()) args + arrayOf(
     "--username",
     getModule<AllowCrackedAccounts>().crackedUsername
@@ -151,8 +160,6 @@ fun handleBukkitPacket(packet: Any?) {
         }
     }
 }
-
-fun modName() = runCatching { "solartweaksv$version-lunar${minecraftVersion.id}" }.getOrElse { "solartweaksv$version" }
 
 fun sendLaunch() {
     runCatching {
