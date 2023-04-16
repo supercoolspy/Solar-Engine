@@ -21,7 +21,7 @@ fun premain(arg: String?, inst: Instrumentation) {
 
     println("Solar Engine version $version")
 
-    val configFile = File(arg ?: "config.json")
+    val configFile = File("./config.json")
     println("Using config file $configFile")
 
     globalConfiguration = loadConfig(configFile)
